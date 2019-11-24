@@ -1,26 +1,63 @@
-import { IonContent, IonHeader, IonPage, IonTitle, IonToolbar } from '@ionic/react';
-import React from 'react';
+import React, { Component } from 'react';
+import { IonContent, IonHeader, IonPage, IonTitle, IonToolbar, IonButton } from '@ionic/react';
+import axios from 'axios';
 
-const Home: React.FC = () => {
-  return (
-    <IonPage>
-      <IonHeader>
-        <IonToolbar>
-          <IonTitle>Ionic Blank</IonTitle>
-        </IonToolbar>
-      </IonHeader>
-      <IonContent className="ion-padding">
-        The world is your oyster.
-        <p>
-          If you get lost, the{' '}
-          <a target="_blank" rel="noopener noreferrer" href="https://ionicframework.com/docs/">
-            docs
-          </a>{' '}
-          will be your guide.
-        </p>
-      </IonContent>
-    </IonPage>
-  );
-};
+interface IProps { }
+
+export interface IState {
+  rates?: { [key: string]: number };
+  base?: string;
+  date?: Date;
+}
+
+
+class Home extends Component<IProps, IState> {
+  state = {
+    rates: undefined,
+    base: undefined,
+    date: undefined
+  }
+
+  componentDidMount() {
+    this.fetchRates()
+  }
+
+  fetchRates = () => {
+    axios.get("https://api.exchangeratesapi.io/latest")
+      .then(response => {
+        this.setState(response.data)
+        console.log(this.state)
+      })
+  }
+
+  doRefresh() {
+    this.fetchRates()
+  }
+
+  render() {
+    let date
+
+    if (this.state.date !== undefined) {
+      date = (
+        <span>{this.state.date}</span>
+      )
+    }
+
+    return (
+      <IonPage>
+        <IonHeader>
+          <IonToolbar>
+            <IonTitle>Currency Converter</IonTitle>
+          </IonToolbar>
+        </IonHeader>
+        <IonContent className="ion-padding">
+
+          <IonButton onClick={this.fetchRates}>Refresh</IonButton>
+          <p>Updated {date}</p>
+        </IonContent>
+      </IonPage>
+    )
+  }
+}
 
 export default Home;
