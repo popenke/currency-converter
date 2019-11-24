@@ -1,10 +1,13 @@
 import React, { Component } from 'react';
-import { IonContent, IonHeader, IonPage, IonTitle, IonToolbar, IonButton } from '@ionic/react';
+import { IonContent, IonHeader, IonPage, IonTitle, IonToolbar, IonButton, IonInput } from '@ionic/react';
+import { Plugins } from '@capacitor/core';
 import axios from 'axios';
+
+const { Storage } = Plugins;
 
 interface IProps { }
 
-export interface IState {
+interface IState {
   rates?: { [key: string]: number };
   base?: string;
   date?: Date;
@@ -12,11 +15,7 @@ export interface IState {
 
 
 class Home extends Component<IProps, IState> {
-  state = {
-    rates: undefined,
-    base: undefined,
-    date: undefined
-  }
+  state: IState = {}
 
   componentDidMount() {
     this.fetchRates()
@@ -26,12 +25,34 @@ class Home extends Component<IProps, IState> {
     axios.get("https://api.exchangeratesapi.io/latest")
       .then(response => {
         this.setState(response.data)
+        this.setObject()
         console.log(this.state)
       })
   }
 
   doRefresh() {
     this.fetchRates()
+  }
+
+  async setObject() {
+    await Storage.set({
+      key: this.state.base as string,
+      value: JSON.stringify(this.state)
+    });
+  }
+
+  async keys() {
+    const keys = await Storage.keys();
+    console.log('Got keys: ', keys);
+  }
+
+  getObject = async () => {
+    const ret = await Storage.get({key: this.state.base as string});
+
+    if (ret.value !== null) {
+      const date = JSON.parse(ret.value);
+      console.log(date)
+    }
   }
 
   render() {
@@ -51,9 +72,13 @@ class Home extends Component<IProps, IState> {
           </IonToolbar>
         </IonHeader>
         <IonContent className="ion-padding">
-
           <IonButton onClick={this.fetchRates}>Refresh</IonButton>
+          <IonButton onClick={this.getObject}>Get data from Storage</IonButton>
+          <IonButton onClick={this.keys}>Get keys from Storage</IonButton>
           <p>Updated {date}</p>
+
+          <IonInput type="number" value="1" color="primary" placeholder={this.state.base} ></IonInput>
+          <IonInput type="number" value="333"></IonInput>
         </IonContent>
       </IonPage>
     )
