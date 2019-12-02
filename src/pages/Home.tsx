@@ -144,7 +144,7 @@ class Home extends Component<IProps, IState> {
                 <IonModal isOpen={this.state.showModal}>
                   <IonContent>
                     <IonList>
-                      <IonItem onClick={() => this.getObject()} detail>
+                      <IonItem onClick={() => this.getObject} button>
                         <IonLabel>BRL</IonLabel>
                       </IonItem>
                     </IonList>
